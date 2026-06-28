@@ -19,7 +19,7 @@ export interface LineItem {
 
 export interface BaseDocument {
   id?: string;
-  clientRef: string; // ObjectId referencing the master Client
+  clientRef: any; // Type as any for compatibility between string ID (frontend) and ObjectId (Mongoose)
   clientInfo: Omit<Client, 'id'>; // Snapshot profile for historical consistency
   items: LineItem[];
   subTotal: number;
@@ -44,11 +44,33 @@ export interface Invoice extends BaseDocument {
   status: QuotationStatus | ProformaStatus | InvoiceStatus;
   
   // Tracing fields
-  quotationRef?: string; // Tracks source quote if converted to proforma or invoice
-  proformaRef?: string;  // Tracks source proforma if converted to invoice
+  quotationRef?: any;
+  proformaRef?: any;
   
   // Type-specific optional fields
-  validUntil?: Date | string; // For Quotation and Proforma Invoice
-  paymentStatus?: PaymentStatus; // For Final Invoice
-  paymentDate?: Date | string; // For Final Invoice
+  validUntil?: Date | string;
+  paymentStatus?: PaymentStatus;
+  paymentDate?: Date | string;
+}
+
+// Kept for legacy model compatibility
+export interface Quotation extends BaseDocument {
+  quoteNumber: string;
+  validUntil: Date | string;
+  status: QuotationStatus;
+}
+
+export interface ProformaInvoice extends BaseDocument {
+  proformaNumber: string;
+  quotationRef?: any;
+  validUntil: Date | string;
+  status: ProformaStatus;
+}
+
+export interface FinalInvoice extends BaseDocument {
+  invoiceNumber: string;
+  proformaRef?: any;
+  status: InvoiceStatus;
+  paymentStatus: PaymentStatus;
+  paymentDate?: Date | string;
 }
