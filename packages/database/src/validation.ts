@@ -16,6 +16,7 @@ export const lineItemSchema = z.object({
   quantity: z.number().positive('Quantity must be greater than 0'),
   price: z.number().nonnegative('Price must be greater than or equal to 0'),
   taxRate: z.number().nonnegative('Tax rate must be greater than or equal to 0').default(0),
+  hsnSac: z.string().optional().default('998311'),
   taxAmount: z.number().nonnegative().default(0),
   total: z.number().nonnegative().default(0),
 });

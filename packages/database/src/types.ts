@@ -13,6 +13,7 @@ export interface LineItem {
   quantity: number;
   price: number;
   taxRate: number; // Percentage, e.g. 18 for 18%
+  hsnSac?: string;   // HSN/SAC Code
   taxAmount?: number; // (Price * Quantity) * (TaxRate / 100)
   total?: number; // (Price * Quantity) + TaxAmount
 }

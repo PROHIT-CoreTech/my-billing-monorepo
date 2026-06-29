@@ -6,6 +6,7 @@ export const LineItemSchema = new Schema<LineItem>({
   quantity: { type: Number, required: true, min: 0 },
   price: { type: Number, required: true, min: 0 },
   taxRate: { type: Number, default: 0, min: 0 },
+  hsnSac: { type: String, default: '998311' },
   taxAmount: { type: Number, default: 0, min: 0 },
   total: { type: Number, default: 0, min: 0 },
 });

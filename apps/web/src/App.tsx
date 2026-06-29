@@ -73,6 +73,7 @@ export default function App() {
       notes: doc.notes,
       currency: doc.currency,
       applyGst: (doc as any).applyGst !== false,
+      logoUrl: `${window.location.origin}/website_icon.png`,
     };
   };
 
@@ -104,8 +105,8 @@ export default function App() {
   const [currency, setCurrency] = useState('INR');
   const [notes, setNotes] = useState('');
   const [dateVal, setDateVal] = useState('');
-  const [items, setItems] = useState<Array<{ description: string; quantity: number; price: number; taxRate: number }>>([
-    { description: '', quantity: 1, price: 0, taxRate: 18 }
+  const [items, setItems] = useState<Array<{ description: string; quantity: number; price: number; taxRate: number; hsnSac: string }>>([
+    { description: '', quantity: 1, price: 0, taxRate: 18, hsnSac: '998311' }
   ]);
 
   // Date and Search Helpers
@@ -242,7 +243,7 @@ export default function App() {
 
   // Form Handlers
   const handleAddItem = () => {
-    setItems([...items, { description: '', quantity: 1, price: 0, taxRate: 18 }]);
+    setItems([...items, { description: '', quantity: 1, price: 0, taxRate: 18, hsnSac: '998311' }]);
   };
 
   const handleRemoveItem = (index: number) => {
@@ -271,7 +272,7 @@ export default function App() {
     setCurrency('INR');
     setNotes('');
     setDateVal('');
-    setItems([{ description: '', quantity: 1, price: 0, taxRate: 18 }]);
+    setItems([{ description: '', quantity: 1, price: 0, taxRate: 18, hsnSac: '998311' }]);
     setNewClientData({
       name: '',
       email: '',
@@ -406,6 +407,7 @@ export default function App() {
             quantity: Number(item.quantity) || 0,
             price: Number(item.price) || 0,
             taxRate: Number(item.taxRate) || 0,
+            hsnSac: item.hsnSac || '998311',
           })),
           currency: currency,
           notes: notes,
@@ -433,6 +435,7 @@ export default function App() {
             quantity: Number(item.quantity) || 0,
             price: Number(item.price) || 0,
             taxRate: Number(item.taxRate) || 0,
+            hsnSac: item.hsnSac || '998311',
           })),
           currency: currency,
           notes: notes,
@@ -460,6 +463,7 @@ export default function App() {
             quantity: Number(item.quantity) || 0,
             price: Number(item.price) || 0,
             taxRate: Number(item.taxRate) || 0,
+            hsnSac: item.hsnSac || '998311',
           })),
           currency: currency,
           notes: notes,
@@ -866,102 +870,113 @@ export default function App() {
 
                 {/* Items Section */}
                 <div className="items-section-title">Line Items</div>
-                <table className="items-table">
-                  <thead>
-                    <tr>
-                      <th style={{ width: '40%' }}>Description *</th>
-                      <th style={{ width: '15%' }}>Qty *</th>
-                      <th style={{ width: '15%' }}>Price *</th>
-                      <th style={{ width: '15%' }}>Tax (%)</th>
-                      <th style={{ width: '10%', textAlign: 'right' }}>Total</th>
-                      <th style={{ width: '5%' }}></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {items.map((item, idx) => {
-                      const itemSubTotal = item.quantity * item.price;
-                      const itemTax = itemSubTotal * (item.taxRate / 100);
-                      const itemTotal = itemSubTotal + itemTax;
-                      return (
-                        <tr key={idx} className="item-row">
-                          <td>
-                            <input
-                              type="text"
-                              value={item.description}
-                              onChange={(e) => handleItemChange(idx, 'description', e.target.value)}
-                              placeholder="Service / Product name"
-                              required
-                            />
-                          </td>
-                          <td>
-                            <input
-                              type="text"
-                              value={item.quantity === 0 ? '' : item.quantity}
-                              onChange={(e) => {
-                                const val = e.target.value;
-                                if (val === '' || /^\d*$/.test(val)) {
-                                  let cleaned = val;
-                                  if (/^0\d+/.test(val)) {
-                                    cleaned = val.replace(/^0+/, '');
+                <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', width: '100%', marginBottom: '1.25rem' }}>
+                  <table className="items-table" style={{ minWidth: '700px', margin: 0 }}>
+                    <thead>
+                      <tr>
+                        <th style={{ width: '35%' }}>Description *</th>
+                        <th style={{ width: '15%' }}>HSN/SAC</th>
+                        <th style={{ width: '12%' }}>Qty *</th>
+                        <th style={{ width: '13%' }}>Price *</th>
+                        <th style={{ width: '12%' }}>Tax (%)</th>
+                        <th style={{ width: '10%', textAlign: 'right' }}>Total</th>
+                        <th style={{ width: '3%' }}></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {items.map((item, idx) => {
+                        const itemSubTotal = item.quantity * item.price;
+                        const itemTax = itemSubTotal * (item.taxRate / 100);
+                        const itemTotal = itemSubTotal + itemTax;
+                        return (
+                          <tr key={idx} className="item-row">
+                            <td>
+                              <input
+                                type="text"
+                                value={item.description}
+                                onChange={(e) => handleItemChange(idx, 'description', e.target.value)}
+                                placeholder="Service / Product name"
+                                required
+                              />
+                            </td>
+                            <td>
+                              <input
+                                type="text"
+                                value={item.hsnSac}
+                                onChange={(e) => handleItemChange(idx, 'hsnSac', e.target.value)}
+                                placeholder="998311"
+                              />
+                            </td>
+                            <td>
+                              <input
+                                type="text"
+                                value={item.quantity === 0 ? '' : item.quantity}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  if (val === '' || /^\d*$/.test(val)) {
+                                    let cleaned = val;
+                                    if (/^0\d+/.test(val)) {
+                                      cleaned = val.replace(/^0+/, '');
+                                    }
+                                    handleItemChange(idx, 'quantity', cleaned === '' ? 0 : Number(cleaned));
                                   }
-                                  handleItemChange(idx, 'quantity', cleaned === '' ? 0 : Number(cleaned));
-                                }
-                              }}
-                              required
-                            />
-                          </td>
-                          <td>
-                            <input
-                              type="text"
-                              value={item.price === 0 ? '' : item.price}
-                              onChange={(e) => {
-                                const val = e.target.value;
-                                if (val === '' || /^\d*\.?\d*$/.test(val)) {
-                                  let cleaned = val;
-                                  if (/^0\d+/.test(val) && !val.startsWith('0.')) {
-                                    cleaned = val.replace(/^0+/, '');
+                                }}
+                                required
+                              />
+                            </td>
+                            <td>
+                              <input
+                                type="text"
+                                value={item.price === 0 ? '' : item.price}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  if (val === '' || /^\d*\.?\d*$/.test(val)) {
+                                    let cleaned = val;
+                                    if (/^0\d+/.test(val) && !val.startsWith('0.')) {
+                                      cleaned = val.replace(/^0+/, '');
+                                    }
+                                    handleItemChange(idx, 'price', cleaned === '' ? 0 : Number(cleaned));
                                   }
-                                  handleItemChange(idx, 'price', cleaned === '' ? 0 : Number(cleaned));
-                                }
-                              }}
-                              placeholder="0.00"
-                              required
-                            />
-                          </td>
-                          <td>
-                            <input
-                              type="text"
-                              value={item.taxRate === 0 ? '' : item.taxRate}
-                              onChange={(e) => {
-                                const val = e.target.value;
-                                if (val === '' || /^\d*$/.test(val)) {
-                                  let cleaned = val;
-                                  if (/^0\d+/.test(val)) {
-                                    cleaned = val.replace(/^0+/, '');
+                                }}
+                                placeholder="0.00"
+                                required
+                              />
+                            </td>
+                            <td>
+                              <input
+                                type="text"
+                                value={item.taxRate === 0 ? '' : item.taxRate}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  if (val === '' || /^\d*$/.test(val)) {
+                                    let cleaned = val;
+                                    if (/^0\d+/.test(val)) {
+                                      cleaned = val.replace(/^0+/, '');
+                                    }
+                                    handleItemChange(idx, 'taxRate', cleaned === '' ? 0 : Number(cleaned));
                                   }
-                                  handleItemChange(idx, 'taxRate', cleaned === '' ? 0 : Number(cleaned));
-                                }
-                              }}
-                            />
-                          </td>
-                          <td style={{ textAlign: 'right', fontWeight: '500' }}>
-                            {formatCurrency(itemTotal, currency)}
-                          </td>
-                          <td>
-                            <button
-                              type="button"
-                              className="btn-delete-item"
-                              disabled={items.length === 1}
-                              onClick={() => handleRemoveItem(idx)}
-                            >
-                              &times;
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                                }}
+                              />
+                            </td>
+                            <td style={{ textAlign: 'right', fontWeight: '500' }}>
+                              {formatCurrency(itemTotal, currency)}
+                            </td>
+                            <td>
+                              <button
+                                type="button"
+                                className="btn-delete-item"
+                                disabled={items.length === 1}
+                                onClick={() => handleRemoveItem(idx)}
+                              >
+                                &times;
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
                 <button type="button" className="btn-inline-action" onClick={handleAddItem}>
                   + Add Item
                 </button>

@@ -201,6 +201,22 @@ body.tally-billing-body {
   line-height: 1.35;
 }
 
+.tally-bank-detail-row {
+  display: flex;
+  margin-bottom: 2px;
+}
+
+.tally-bank-detail-label {
+  font-weight: bold;
+  width: 110px;
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+.tally-bank-detail-value {
+  display: inline-block;
+}
+
 .tally-sign-off-table {
   width: 100%;
   border-collapse: collapse;

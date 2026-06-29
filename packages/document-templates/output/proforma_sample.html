@@ -221,6 +221,22 @@ body.tally-billing-body {
   line-height: 1.35;
 }
 
+.tally-bank-detail-row {
+  display: flex;
+  margin-bottom: 2px;
+}
+
+.tally-bank-detail-label {
+  font-weight: bold;
+  width: 110px;
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+.tally-bank-detail-value {
+  display: inline-block;
+}
+
 .tally-sign-off-table {
   width: 100%;
   border-collapse: collapse;
@@ -285,7 +301,10 @@ body.tally-billing-body {
         <td style="width: 50%; height: 110px;">
           <!-- Primary Issuer Details (Tally style top left) -->
           <div class="tally-issuer-details">
-            <div class="tally-company-name">CASHFLOW DETAILS</div>
+            <div class="tally-company-name" style="font-size: 13px; display: flex; align-items: center; gap: 6px; margin-bottom: 5px;">
+              
+              CASHFLOW DETAILS
+            </div>
             <div class="tally-small-text">Proprietor: Naresh Pandurang Bhuvad</div>
             <div>
               2b/706, 7th Floor, N.G. Suncity Phase II CHS,<br>
@@ -556,10 +575,22 @@ body.tally-billing-body {
               <!-- Hardcoded Bank details -->
               <td class="tally-bank-cell" style="border-top: none; border-right: none; border-bottom: none;">
                 <div class="tally-bold" style="margin-bottom: 3px;">Company's Bank Details:</div>
-                <div><strong>A/c Holder's Name</strong> &nbsp;: Cashflow Solutions</div>
-                <div><strong>Bank Name</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: YES BANK</div>
-                <div><strong>A/c No.</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <strong style="font-size: 11px;">021261900003481</strong></div>
-                <div><strong>Branch & IFS Code</strong> &nbsp;&nbsp;: Kandivali East, Thakur Village & <strong>YESB0000212</strong></div>
+                <div class="tally-bank-detail-row">
+                  <span class="tally-bank-detail-label">A/c Holder's Name</span>
+                  <span class="tally-bank-detail-value">: Cashflow Solutions</span>
+                </div>
+                <div class="tally-bank-detail-row">
+                  <span class="tally-bank-detail-label">Bank Name</span>
+                  <span class="tally-bank-detail-value">: YES BANK</span>
+                </div>
+                <div class="tally-bank-detail-row">
+                  <span class="tally-bank-detail-label">A/c No.</span>
+                  <span class="tally-bank-detail-value">: 021261900003481</span>
+                </div>
+                <div class="tally-bank-detail-row">
+                  <span class="tally-bank-detail-label">Branch & IFS Code</span>
+                  <span class="tally-bank-detail-value">: Kandivali East, Thakur Village & YESB0000212</span>
+                </div>
               </td>
             </tr>
           </table>

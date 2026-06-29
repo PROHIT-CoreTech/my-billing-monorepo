@@ -41,6 +41,7 @@ export interface DocumentData {
     branch?: string;
   };
   terms?: string[];
+  logoUrl?: string;
 }
 
 /**
@@ -336,6 +337,22 @@ body.tally-billing-body {
   width: 50%;
   font-size: 9.5px;
   line-height: 1.35;
+}
+
+.tally-bank-detail-row {
+  display: flex;
+  margin-bottom: 2px;
+}
+
+.tally-bank-detail-label {
+  font-weight: bold;
+  width: 110px;
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+.tally-bank-detail-value {
+  display: inline-block;
 }
 
 .tally-sign-off-table {
@@ -661,7 +678,10 @@ export function generateDocumentHtml(data: DocumentData): string {
         <td style="width: 50%; height: 110px;">
           <!-- Primary Issuer Details (Tally style top left) -->
           <div class="tally-issuer-details">
-            <div class="tally-company-name">CASHFLOW DETAILS</div>
+            <div class="tally-company-name" style="font-size: 13px; display: flex; align-items: center; gap: 6px; margin-bottom: 5px;">
+              ${data.logoUrl ? `<img src="${data.logoUrl}" alt="Logo" style="height: 16px; width: 16px; object-fit: contain; display: inline-block; vertical-align: middle;" onError="this.style.display='none';" />` : ''}
+              CASHFLOW DETAILS
+            </div>
             <div class="tally-small-text">Proprietor: Naresh Pandurang Bhuvad</div>
             <div>
               2b/706, 7th Floor, N.G. Suncity Phase II CHS,<br>
@@ -901,10 +921,22 @@ export function generateDocumentHtml(data: DocumentData): string {
               <!-- Hardcoded Bank details -->
               <td class="tally-bank-cell" style="border-top: none; border-right: none; border-bottom: none;">
                 <div class="tally-bold" style="margin-bottom: 3px;">Company's Bank Details:</div>
-                <div><strong>A/c Holder's Name</strong> &nbsp;: ${escapeHtml(bank.accountName || '')}</div>
-                <div><strong>Bank Name</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: ${escapeHtml(bank.bankName || '')}</div>
-                <div><strong>A/c No.</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <strong style="font-size: 11px;">${escapeHtml(bank.accountNumber || '')}</strong></div>
-                <div><strong>Branch & IFS Code</strong> &nbsp;&nbsp;: ${escapeHtml(bank.branch || '')} & <strong>${escapeHtml(bank.ifscCode || '')}</strong></div>
+                <div class="tally-bank-detail-row">
+                  <span class="tally-bank-detail-label">A/c Holder's Name</span>
+                  <span class="tally-bank-detail-value">: ${escapeHtml(bank.accountName || '')}</span>
+                </div>
+                <div class="tally-bank-detail-row">
+                  <span class="tally-bank-detail-label">Bank Name</span>
+                  <span class="tally-bank-detail-value">: ${escapeHtml(bank.bankName || '')}</span>
+                </div>
+                <div class="tally-bank-detail-row">
+                  <span class="tally-bank-detail-label">A/c No.</span>
+                  <span class="tally-bank-detail-value">: ${escapeHtml(bank.accountNumber || '')}</span>
+                </div>
+                <div class="tally-bank-detail-row">
+                  <span class="tally-bank-detail-label">Branch & IFS Code</span>
+                  <span class="tally-bank-detail-value">: ${escapeHtml(bank.branch || '')} & ${escapeHtml(bank.ifscCode || '')}</span>
+                </div>
               </td>
             </tr>
           </table>
