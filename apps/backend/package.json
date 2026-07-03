@@ -7,7 +7,8 @@
     "build": "cd ../.. && npm run build --workspace=@my-billing/database && cd apps/backend && tsc",
     "dev": "nodemon src/index.ts",
     "start": "node dist/index.js",
-    "migrate": "node dist/migrate.js"
+    "migrate": "node dist/migrate.js",
+    "db:clear": "node dist/clean-db.js"
   },
   "dependencies": {
     "@my-billing/database": "file:../../packages/database",

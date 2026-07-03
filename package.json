@@ -10,7 +10,8 @@
     "build": "turbo run build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
-    "clean": "turbo run clean"
+    "clean": "turbo run clean",
+    "db:clear": "npm run db:clear --workspace=@my-billing/backend --"
   },
   "devDependencies": {
     "turbo": "^2.0.0",
