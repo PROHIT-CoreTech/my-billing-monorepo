@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import './index.css';
 import {
   useGetQuotations,
@@ -18,6 +18,7 @@ import {
   useDeleteQuotation,
   useDeleteProformaInvoice,
   useDeleteFinalInvoice,
+  apiClient,
 } from '@my-billing/api-client';
 import { type Quotation, type ProformaInvoice, type FinalInvoice } from '@my-billing/database';
 import { generateDocumentHtml } from '@my-billing/document-templates';
@@ -52,6 +53,18 @@ export default function App() {
   const [printDoc, setPrintDoc] = useState<Quotation | ProformaInvoice | FinalInvoice | null>(null);
   const [editingDoc, setEditingDoc] = useState<Quotation | ProformaInvoice | FinalInvoice | null>(null);
   const [logoUrl, setLogoUrl] = useState('');
+  
+  const [isApiLoading, setIsApiLoading] = useState(false);
+
+  useEffect(() => {
+    const handleLoading = (e: Event) => {
+      setIsApiLoading((e as CustomEvent<boolean>).detail);
+    };
+    window.addEventListener('apiClient:loading', handleLoading);
+    return () => {
+      window.removeEventListener('apiClient:loading', handleLoading);
+    };
+  }, []);
   
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
@@ -456,14 +469,8 @@ export default function App() {
     reader.onload = async () => {
       const base64Data = (reader.result as string).split(',')[1];
       try {
-        const response = await fetch('http://localhost:5001/api/upload', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: file.name, data: base64Data }),
-        });
-        if (!response.ok) throw new Error('Upload failed');
-        const result = await response.json();
-        setLogoUrl(result.url);
+        const response = await apiClient.post('/upload', { name: file.name, data: base64Data });
+        setLogoUrl(response.data.url);
         alert('Logo uploaded successfully!');
       } catch (err) {
         console.error(err);
@@ -1372,6 +1379,15 @@ export default function App() {
               )}
               <button type="button" className="btn-primary-action" onClick={handlePrint}>Print / Save PDF</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {isApiLoading && (
+        <div className="global-loader-overlay">
+          <div className="global-loader-spinner-container">
+            <div className="global-loader-spinner"></div>
+            <p className="global-loader-text">Loading...</p>
           </div>
         </div>
       )}
