@@ -104,7 +104,7 @@ export default function App() {
       notes: doc.notes,
       currency: doc.currency,
       applyGst: (doc as any).applyGst !== false,
-      logoUrl: (doc as any).logoUrl || `${window.location.origin}/website_icon.png`,
+      logoUrl: (doc as any).logoUrl || `${window.location.origin}/images/website_icon.png`,
     };
   };
 
@@ -751,7 +751,7 @@ export default function App() {
       <header className="header">
         <div className="logo-section">
           <h1 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <img src="/website_icon.png" alt="Logo" style={{ height: '36px', width: '36px', objectFit: 'contain' }} />
+            <img src="/images/website_icon.png" alt="Logo" style={{ height: '36px', width: '36px', objectFit: 'contain' }} />
             Cashflow Billing ERP
           </h1>
           <p>Production-Grade Invoicing & Billing Dashboard</p>
