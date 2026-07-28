@@ -480,14 +480,46 @@ export default function App() {
     reader.readAsDataURL(file);
   };
 
+  const handleGSTINChange = (val: string) => {
+    const uppercaseGstin = val.toUpperCase();
+    let updatedPan = newClientData.pan;
+    let updatedTaxId = newClientData.taxId;
+
+    if (uppercaseGstin.length >= 12) {
+      const extractedPan = uppercaseGstin.substring(2, 12);
+      if (!newClientData.pan || newClientData.pan === (newClientData.gstin.length >= 12 ? newClientData.gstin.substring(2, 12) : '')) {
+        updatedPan = extractedPan;
+      }
+    }
+
+    if (!newClientData.taxId || newClientData.taxId === newClientData.gstin) {
+      updatedTaxId = uppercaseGstin;
+    }
+
+    setNewClientData({
+      ...newClientData,
+      gstin: uppercaseGstin,
+      pan: updatedPan,
+      taxId: updatedTaxId,
+    });
+  };
+
   const handleCreateClient = async (e: React.MouseEvent) => {
     e.preventDefault();
     if (!newClientData.name || !newClientData.email) {
-      alert('Name and Email are required.');
+      alert('Client Name and Email are required.');
       return;
     }
+
+    const finalTaxId = newClientData.taxId.trim() || newClientData.gstin.trim() || newClientData.pan.trim() || 'N/A';
+    const finalBillingAddress = newClientData.billingAddress.trim() || 'N/A';
+
     try {
-      const created = await createClientMutation.mutateAsync(newClientData);
+      const created = await createClientMutation.mutateAsync({
+        ...newClientData,
+        taxId: finalTaxId,
+        billingAddress: finalBillingAddress,
+      });
       const createdId = created.id || created._id;
       setSelectedClientId(createdId);
       setIsCreatingClient(false);
@@ -1063,67 +1095,91 @@ export default function App() {
                     </div>
                   ) : (
                     <div className="inline-client-card">
-                      <h4>Register New Client inline</h4>
+                      <h4>Register New Client Inline</h4>
+                      
                       <div className="form-row">
                         <div className="form-group">
+                          <label htmlFor="client-name-input">Client Name *</label>
                           <input
+                            id="client-name-input"
                             type="text"
-                            placeholder="Client Name *"
+                            placeholder="e.g. VVL Pharma Pvt Ltd"
                             className="form-input"
                             value={newClientData.name}
                             onChange={(e) => setNewClientData({ ...newClientData, name: e.target.value })}
+                            required
                           />
                         </div>
                         <div className="form-group">
+                          <label htmlFor="client-email-input">Client Email *</label>
                           <input
+                            id="client-email-input"
                             type="email"
-                            placeholder="Client Email *"
+                            placeholder="e.g. actspbllifecare@gmail.com"
                             className="form-input"
                             value={newClientData.email}
                             onChange={(e) => setNewClientData({ ...newClientData, email: e.target.value })}
+                            required
                           />
                         </div>
                       </div>
+
                       <div className="form-row" style={{ marginTop: '0.5rem' }}>
                         <div className="form-group">
+                          <label htmlFor="client-gstin-input">GSTIN (15-Digit)</label>
                           <input
+                            id="client-gstin-input"
                             type="text"
-                            placeholder="Tax ID / Registration Code *"
+                            placeholder="e.g. 27AACCV2070N1Z2"
+                            className="form-input"
+                            value={newClientData.gstin}
+                            onChange={(e) => handleGSTINChange(e.target.value)}
+                            maxLength={15}
+                          />
+                          <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Auto-populates PAN & Tax ID</span>
+                        </div>
+                        <div className="form-group">
+                          <label htmlFor="client-pan-input">PAN (10-Digit)</label>
+                          <input
+                            id="client-pan-input"
+                            type="text"
+                            placeholder="e.g. AACCV2070N"
+                            className="form-input"
+                            value={newClientData.pan}
+                            onChange={(e) => setNewClientData({ ...newClientData, pan: e.target.value.toUpperCase() })}
+                            maxLength={10}
+                          />
+                          {newClientData.gstin.length >= 12 && newClientData.pan === newClientData.gstin.substring(2, 12) && (
+                            <span style={{ fontSize: '0.7rem', color: '#34d399' }}>✓ Auto-extracted from GSTIN</span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="form-row" style={{ marginTop: '0.5rem' }}>
+                        <div className="form-group">
+                          <label htmlFor="client-taxid-input">Tax ID / Registration Code</label>
+                          <input
+                            id="client-taxid-input"
+                            type="text"
+                            placeholder="Defaults to GSTIN if left blank"
                             className="form-input"
                             value={newClientData.taxId}
                             onChange={(e) => setNewClientData({ ...newClientData, taxId: e.target.value })}
                           />
                         </div>
                         <div className="form-group">
+                          <label htmlFor="client-address-input">Billing Address</label>
                           <input
+                            id="client-address-input"
                             type="text"
-                            placeholder="Billing Address"
+                            placeholder="e.g. Panvel, Maharashtra"
                             className="form-input"
                             value={newClientData.billingAddress}
                             onChange={(e) => setNewClientData({ ...newClientData, billingAddress: e.target.value })}
                           />
                         </div>
                       </div>
-                      <div className="form-row" style={{ marginTop: '0.5rem' }}>
-                        <div className="form-group">
-                          <input
-                            type="text"
-                            placeholder="GSTIN"
-                            className="form-input"
-                            value={newClientData.gstin}
-                            onChange={(e) => setNewClientData({ ...newClientData, gstin: e.target.value })}
-                          />
-                        </div>
-                        <div className="form-group">
-                          <input
-                            type="text"
-                            placeholder="PAN"
-                            className="form-input"
-                            value={newClientData.pan}
-                            onChange={(e) => setNewClientData({ ...newClientData, pan: e.target.value })}
-                          />
-                        </div>
-                      </div>
+
                       <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', justifyContent: 'flex-end' }}>
                         <button className="btn-secondary-action" style={{ padding: '0.4rem 1rem' }} onClick={(e) => { e.preventDefault(); setIsCreatingClient(false); }}>
                           Cancel
