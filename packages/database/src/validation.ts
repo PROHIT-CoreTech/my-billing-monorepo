@@ -1,5 +1,29 @@
 import { z } from 'zod';
 
+const stringOrRefObject = z.union([z.string(), z.record(z.any()), z.null()]).optional().transform((val) => {
+  if (!val) return undefined;
+  if (typeof val === 'string') return val.trim() || undefined;
+  if (typeof val === 'object') return (val as any).id || (val as any)._id || (val as any).toString() || undefined;
+  return undefined;
+});
+
+const requiredStringOrRefObject = z.union([z.string(), z.record(z.any())]).transform((val, ctx) => {
+  if (typeof val === 'string') {
+    const trimmed = val.trim();
+    if (!trimmed) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Client ID reference is required' });
+      return z.NEVER;
+    }
+    return trimmed;
+  }
+  if (typeof val === 'object' && val !== null) {
+    const extracted = (val as any).id || (val as any)._id || (val as any).toString();
+    if (extracted) return String(extracted);
+  }
+  ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Client ID reference is required' });
+  return z.NEVER;
+});
+
 export const clientSchema = z.object({
   name: z.string().min(1, 'Client name is required'),
   email: z.string().email('Invalid email address'),
@@ -25,7 +49,7 @@ export const lineItemSchema = z.object({
 export const invoiceSchema = z.object({
   documentType: z.enum(['QUOTATION', 'PROFORMA', 'FINAL_INVOICE']),
   documentNumber: z.string().min(1, 'Document number is required'),
-  clientRef: z.string().min(1, 'Client ID reference is required'),
+  clientRef: requiredStringOrRefObject,
   clientInfo: clientInfoSchema,
   items: z.array(lineItemSchema).min(1, 'At least one item is required'),
   subTotal: z.number().nonnegative().default(0),
@@ -39,8 +63,8 @@ export const invoiceSchema = z.object({
   logoUrl: z.string().optional(),
   
   // Tracing references
-  quotationRef: z.string().optional(),
-  proformaRef: z.string().optional(),
+  quotationRef: stringOrRefObject,
+  proformaRef: stringOrRefObject,
   
   // Optional parameters based on documentType
   validUntil: z.union([z.date(), z.string()]).optional(),

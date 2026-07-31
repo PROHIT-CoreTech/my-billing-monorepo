@@ -370,12 +370,20 @@ export default function App() {
     setIsModalOpen(true);
   };
 
+  const getRefId = (ref: any): string => {
+    if (!ref) return '';
+    if (typeof ref === 'string') return ref;
+    if (typeof ref === 'object') return (ref.id || ref._id || '').toString();
+    return '';
+  };
+
   const handleImportQuotation = (qId: string) => {
-    setQuotationRef(qId);
-    if (!qId) return;
-    const q = quotations.find(item => (item.id || (item as any)._id) === qId);
+    const cleanQId = getRefId(qId);
+    setQuotationRef(cleanQId);
+    if (!cleanQId) return;
+    const q = quotations.find(item => getRefId(item.id || (item as any)._id) === cleanQId);
     if (q) {
-      setSelectedClientId(q.clientRef?.id || q.clientRef || '');
+      setSelectedClientId(getRefId(q.clientRef?.id || q.clientRef));
       setCurrency(q.currency);
       setNotes(q.notes || '');
       setLogoUrl((q as any).logoUrl || '');
@@ -392,15 +400,20 @@ export default function App() {
   };
 
   const handleImportProforma = (pId: string) => {
-    setProformaRef(pId);
-    if (!pId) return;
-    const p = proformas.find(item => (item.id || (item as any)._id) === pId);
+    const cleanPId = getRefId(pId);
+    setProformaRef(cleanPId);
+    if (!cleanPId) return;
+    const p = proformas.find(item => getRefId(item.id || (item as any)._id) === cleanPId);
     if (p) {
-      setSelectedClientId(p.clientRef?.id || p.clientRef || '');
+      setSelectedClientId(getRefId(p.clientRef?.id || p.clientRef));
       setCurrency(p.currency);
       setNotes(p.notes || '');
       setLogoUrl((p as any).logoUrl || '');
-      setQuotationRef(p.quotationRef || '');
+      
+      // Link to source Quotation if this Proforma originated from a Quotation
+      const sourceQId = getRefId(p.quotationRef);
+      setQuotationRef(sourceQId);
+
       setItems((p.items || []).map(item => ({
         description: item.description,
         quantity: item.quantity,
@@ -415,13 +428,13 @@ export default function App() {
   const openEditModal = (doc: Quotation | ProformaInvoice | FinalInvoice) => {
     setEditingDoc(doc);
     setDocType(doc.documentType);
-    setSelectedClientId(doc.clientRef?.id || doc.clientRef || '');
+    setSelectedClientId(getRefId(doc.clientRef?.id || doc.clientRef));
     setDocNumber(doc.documentNumber || (doc as any).quoteNumber || (doc as any).proformaNumber || (doc as any).invoiceNumber || '');
     setCurrency(doc.currency);
     setNotes(doc.notes || '');
     setLogoUrl((doc as any).logoUrl || '');
-    setQuotationRef(doc.quotationRef || '');
-    setProformaRef((doc as any).proformaRef || '');
+    setQuotationRef(getRefId(doc.quotationRef));
+    setProformaRef(getRefId((doc as any).proformaRef));
     
     const dateLimit = doc.documentType === 'FINAL_INVOICE' ? (doc as any).dueDate : (doc as any).validUntil;
     if (dateLimit) {
@@ -622,6 +635,9 @@ export default function App() {
       discountPercent: Number(item.discountPercent) || 0,
     }));
 
+    const cleanQRef = getRefId(quotationRef) || undefined;
+    const cleanPRef = getRefId(proformaRef) || undefined;
+
     try {
       if (editingDoc) {
         const docId = editingDoc.id || (editingDoc as any)._id;
@@ -665,7 +681,7 @@ export default function App() {
             notes: notes,
             validUntil: new Date(dateVal),
             logoUrl: logoUrl || undefined,
-            quotationRef: quotationRef || undefined,
+            quotationRef: cleanQRef,
           };
           await updateProforma.mutateAsync({ id: docId, data: payload as any });
         } else {
@@ -687,8 +703,8 @@ export default function App() {
             notes: notes,
             dueDate: new Date(dateVal),
             logoUrl: logoUrl || undefined,
-            quotationRef: quotationRef || undefined,
-            proformaRef: proformaRef || undefined,
+            quotationRef: cleanQRef,
+            proformaRef: cleanPRef,
           };
           await updateInvoice.mutateAsync({ id: docId, data: payload as any });
         }
@@ -738,7 +754,7 @@ export default function App() {
             issueDate: new Date(),
             validUntil: new Date(dateVal),
             logoUrl: logoUrl || undefined,
-            quotationRef: quotationRef || undefined,
+            quotationRef: cleanQRef,
           };
           await createProforma.mutateAsync(payload);
         } else {
@@ -763,8 +779,8 @@ export default function App() {
             dueDate: new Date(dateVal),
             paymentStatus: 'UNPAID' as const,
             logoUrl: logoUrl || undefined,
-            quotationRef: quotationRef || undefined,
-            proformaRef: proformaRef || undefined,
+            quotationRef: cleanQRef,
+            proformaRef: cleanPRef,
           };
           await createInvoice.mutateAsync(payload);
         }
@@ -1022,12 +1038,12 @@ export default function App() {
                         <label>Import details from Quotation</label>
                         <select
                           className="form-select"
-                          value={quotationRef}
+                          value={getRefId(quotationRef)}
                           onChange={(e) => handleImportQuotation(e.target.value)}
                         >
                           <option value="">-- Select Quotation to Import --</option>
                           {quotations.map(q => (
-                            <option key={q.id || (q as any)._id} value={q.id || (q as any)._id}>
+                            <option key={getRefId(q.id || (q as any)._id)} value={getRefId(q.id || (q as any)._id)}>
                               {q.documentNumber || (q as any).quoteNumber} - {q.clientInfo.name} ({formatCurrency(q.totalAmount, q.currency)})
                             </option>
                           ))}
@@ -1040,12 +1056,12 @@ export default function App() {
                           <label>Import details from Quotation</label>
                           <select
                             className="form-select"
-                            value={quotationRef}
+                            value={getRefId(quotationRef)}
                             onChange={(e) => handleImportQuotation(e.target.value)}
                           >
                             <option value="">-- Select Quotation to Import --</option>
                             {quotations.map(q => (
-                              <option key={q.id || (q as any)._id} value={q.id || (q as any)._id}>
+                              <option key={getRefId(q.id || (q as any)._id)} value={getRefId(q.id || (q as any)._id)}>
                                 {q.documentNumber || (q as any).quoteNumber} - {q.clientInfo.name} ({formatCurrency(q.totalAmount, q.currency)})
                               </option>
                             ))}
@@ -1055,12 +1071,12 @@ export default function App() {
                           <label>Import details from Proforma</label>
                           <select
                             className="form-select"
-                            value={proformaRef}
+                            value={getRefId(proformaRef)}
                             onChange={(e) => handleImportProforma(e.target.value)}
                           >
                             <option value="">-- Select Proforma to Import --</option>
                             {proformas.map(p => (
-                              <option key={p.id || (p as any)._id} value={p.id || (p as any)._id}>
+                              <option key={getRefId(p.id || (p as any)._id)} value={getRefId(p.id || (p as any)._id)}>
                                 {p.documentNumber || (p as any).proformaNumber} - {p.clientInfo.name} ({formatCurrency(p.totalAmount, p.currency)})
                               </option>
                             ))}
