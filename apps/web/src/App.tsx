@@ -163,6 +163,7 @@ export default function App() {
   ]);
   const [quotationRef, setQuotationRef] = useState('');
   const [proformaRef, setProformaRef] = useState('');
+  const [importSource, setImportSource] = useState<'PROFORMA' | 'QUOTATION'>('PROFORMA');
 
   // Date and Search Helpers
   const isToday = (dateStr?: Date | string) => {
@@ -344,6 +345,7 @@ export default function App() {
     setEditingDoc(null);
     setQuotationRef('');
     setProformaRef('');
+    setImportSource('PROFORMA');
     setItems([{ description: '', quantity: 1, price: 0, taxRate: 18, hsnSac: '998311', discountPercent: 0 }]);
     setNewClientData({
       name: '',
@@ -1051,38 +1053,75 @@ export default function App() {
                       </div>
                     )}
                     {docType === 'FINAL_INVOICE' && (
-                      <>
-                        <div className="form-group">
-                          <label>Import details from Quotation</label>
-                          <select
-                            className="form-select"
-                            value={getRefId(quotationRef)}
-                            onChange={(e) => handleImportQuotation(e.target.value)}
-                          >
-                            <option value="">-- Select Quotation to Import --</option>
-                            {quotations.map(q => (
-                              <option key={getRefId(q.id || (q as any)._id)} value={getRefId(q.id || (q as any)._id)}>
-                                {q.documentNumber || (q as any).quoteNumber} - {q.clientInfo.name} ({formatCurrency(q.totalAmount, q.currency)})
-                              </option>
-                            ))}
-                          </select>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', width: '100%' }}>
+                        <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+                          <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                            Import Source:
+                          </span>
+                          <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.85rem', color: 'var(--text-primary)' }}>
+                            <input
+                              type="radio"
+                              name="importSource"
+                              value="PROFORMA"
+                              checked={importSource === 'PROFORMA'}
+                              onChange={() => {
+                                setImportSource('PROFORMA');
+                                setQuotationRef('');
+                                setProformaRef('');
+                              }}
+                            />
+                            Import from Proforma Invoice
+                          </label>
+                          <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.85rem', color: 'var(--text-primary)' }}>
+                            <input
+                              type="radio"
+                              name="importSource"
+                              value="QUOTATION"
+                              checked={importSource === 'QUOTATION'}
+                              onChange={() => {
+                                setImportSource('QUOTATION');
+                                setQuotationRef('');
+                                setProformaRef('');
+                              }}
+                            />
+                            Import from Quotation (Direct)
+                          </label>
                         </div>
-                        <div className="form-group">
-                          <label>Import details from Proforma</label>
-                          <select
-                            className="form-select"
-                            value={getRefId(proformaRef)}
-                            onChange={(e) => handleImportProforma(e.target.value)}
-                          >
-                            <option value="">-- Select Proforma to Import --</option>
-                            {proformas.map(p => (
-                              <option key={getRefId(p.id || (p as any)._id)} value={getRefId(p.id || (p as any)._id)}>
-                                {p.documentNumber || (p as any).proformaNumber} - {p.clientInfo.name} ({formatCurrency(p.totalAmount, p.currency)})
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      </>
+
+                        {importSource === 'PROFORMA' ? (
+                          <div className="form-group" style={{ marginBottom: 0 }}>
+                            <label>Select Proforma Invoice to Import</label>
+                            <select
+                              className="form-select"
+                              value={getRefId(proformaRef)}
+                              onChange={(e) => handleImportProforma(e.target.value)}
+                            >
+                              <option value="">-- Select Proforma to Import --</option>
+                              {proformas.map(p => (
+                                <option key={getRefId(p.id || (p as any)._id)} value={getRefId(p.id || (p as any)._id)}>
+                                  {p.documentNumber || (p as any).proformaNumber} - {p.clientInfo.name} ({formatCurrency(p.totalAmount, p.currency)})
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        ) : (
+                          <div className="form-group" style={{ marginBottom: 0 }}>
+                            <label>Select Quotation to Import (Direct Final Invoice)</label>
+                            <select
+                              className="form-select"
+                              value={getRefId(quotationRef)}
+                              onChange={(e) => handleImportQuotation(e.target.value)}
+                            >
+                              <option value="">-- Select Quotation to Import --</option>
+                              {quotations.map(q => (
+                                <option key={getRefId(q.id || (q as any)._id)} value={getRefId(q.id || (q as any)._id)}>
+                                  {q.documentNumber || (q as any).quoteNumber} - {q.clientInfo.name} ({formatCurrency(q.totalAmount, q.currency)})
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        )}
+                      </div>
                     )}
                   </div>
                 )}
