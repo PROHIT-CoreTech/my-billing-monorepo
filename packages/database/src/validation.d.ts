@@ -45,30 +45,36 @@ export declare const clientInfoSchema: z.ZodObject<{
 }>;
 export declare const lineItemSchema: z.ZodObject<{
     description: z.ZodString;
-    quantity: z.ZodNumber;
+    quantity: z.ZodOptional<z.ZodNumber>;
     price: z.ZodNumber;
     taxRate: z.ZodDefault<z.ZodNumber>;
+    hsnSac: z.ZodDefault<z.ZodOptional<z.ZodString>>;
+    discountPercent: z.ZodDefault<z.ZodOptional<z.ZodNumber>>;
     taxAmount: z.ZodDefault<z.ZodNumber>;
     total: z.ZodDefault<z.ZodNumber>;
 }, "strip", z.ZodTypeAny, {
     description: string;
-    quantity: number;
     price: number;
     taxRate: number;
+    hsnSac: string;
+    discountPercent: number;
     taxAmount: number;
     total: number;
+    quantity?: number | undefined;
 }, {
     description: string;
-    quantity: number;
     price: number;
+    quantity?: number | undefined;
     taxRate?: number | undefined;
+    hsnSac?: string | undefined;
+    discountPercent?: number | undefined;
     taxAmount?: number | undefined;
     total?: number | undefined;
 }>;
 export declare const invoiceSchema: z.ZodObject<{
     documentType: z.ZodEnum<["QUOTATION", "PROFORMA", "FINAL_INVOICE"]>;
     documentNumber: z.ZodString;
-    clientRef: z.ZodString;
+    clientRef: z.ZodEffects<z.ZodUnion<[z.ZodString, z.ZodRecord<z.ZodString, z.ZodAny>]>, string, string | Record<string, any>>;
     clientInfo: z.ZodObject<{
         name: z.ZodString;
         email: z.ZodString;
@@ -93,23 +99,29 @@ export declare const invoiceSchema: z.ZodObject<{
     }>;
     items: z.ZodArray<z.ZodObject<{
         description: z.ZodString;
-        quantity: z.ZodNumber;
+        quantity: z.ZodOptional<z.ZodNumber>;
         price: z.ZodNumber;
         taxRate: z.ZodDefault<z.ZodNumber>;
+        hsnSac: z.ZodDefault<z.ZodOptional<z.ZodString>>;
+        discountPercent: z.ZodDefault<z.ZodOptional<z.ZodNumber>>;
         taxAmount: z.ZodDefault<z.ZodNumber>;
         total: z.ZodDefault<z.ZodNumber>;
     }, "strip", z.ZodTypeAny, {
         description: string;
-        quantity: number;
         price: number;
         taxRate: number;
+        hsnSac: string;
+        discountPercent: number;
         taxAmount: number;
         total: number;
+        quantity?: number | undefined;
     }, {
         description: string;
-        quantity: number;
         price: number;
+        quantity?: number | undefined;
         taxRate?: number | undefined;
+        hsnSac?: string | undefined;
+        discountPercent?: number | undefined;
         taxAmount?: number | undefined;
         total?: number | undefined;
     }>, "many">;
@@ -121,8 +133,9 @@ export declare const invoiceSchema: z.ZodObject<{
     issueDate: z.ZodDefault<z.ZodUnion<[z.ZodDate, z.ZodString]>>;
     dueDate: z.ZodOptional<z.ZodUnion<[z.ZodDate, z.ZodString]>>;
     status: z.ZodDefault<z.ZodString>;
-    quotationRef: z.ZodOptional<z.ZodString>;
-    proformaRef: z.ZodOptional<z.ZodString>;
+    logoUrl: z.ZodOptional<z.ZodString>;
+    quotationRef: z.ZodEffects<z.ZodOptional<z.ZodUnion<[z.ZodString, z.ZodRecord<z.ZodString, z.ZodAny>, z.ZodNull]>>, any, string | Record<string, any> | null | undefined>;
+    proformaRef: z.ZodEffects<z.ZodOptional<z.ZodUnion<[z.ZodString, z.ZodRecord<z.ZodString, z.ZodAny>, z.ZodNull]>>, any, string | Record<string, any> | null | undefined>;
     validUntil: z.ZodOptional<z.ZodUnion<[z.ZodDate, z.ZodString]>>;
     paymentStatus: z.ZodOptional<z.ZodEnum<["UNPAID", "PARTIALLY_PAID", "PAID"]>>;
     paymentDate: z.ZodOptional<z.ZodUnion<[z.ZodDate, z.ZodString]>>;
@@ -142,11 +155,13 @@ export declare const invoiceSchema: z.ZodObject<{
     };
     items: {
         description: string;
-        quantity: number;
         price: number;
         taxRate: number;
+        hsnSac: string;
+        discountPercent: number;
         taxAmount: number;
         total: number;
+        quantity?: number | undefined;
     }[];
     subTotal: number;
     totalAmount: number;
@@ -154,15 +169,16 @@ export declare const invoiceSchema: z.ZodObject<{
     issueDate: string | Date;
     notes?: string | undefined;
     dueDate?: string | Date | undefined;
-    quotationRef?: string | undefined;
-    proformaRef?: string | undefined;
+    logoUrl?: string | undefined;
+    quotationRef?: any;
+    proformaRef?: any;
     validUntil?: string | Date | undefined;
     paymentStatus?: "PAID" | "UNPAID" | "PARTIALLY_PAID" | undefined;
     paymentDate?: string | Date | undefined;
 }, {
     documentType: "QUOTATION" | "PROFORMA" | "FINAL_INVOICE";
     documentNumber: string;
-    clientRef: string;
+    clientRef: string | Record<string, any>;
     clientInfo: {
         name: string;
         email: string;
@@ -173,9 +189,11 @@ export declare const invoiceSchema: z.ZodObject<{
     };
     items: {
         description: string;
-        quantity: number;
         price: number;
+        quantity?: number | undefined;
         taxRate?: number | undefined;
+        hsnSac?: string | undefined;
+        discountPercent?: number | undefined;
         taxAmount?: number | undefined;
         total?: number | undefined;
     }[];
@@ -187,8 +205,9 @@ export declare const invoiceSchema: z.ZodObject<{
     notes?: string | undefined;
     issueDate?: string | Date | undefined;
     dueDate?: string | Date | undefined;
-    quotationRef?: string | undefined;
-    proformaRef?: string | undefined;
+    logoUrl?: string | undefined;
+    quotationRef?: string | Record<string, any> | null | undefined;
+    proformaRef?: string | Record<string, any> | null | undefined;
     validUntil?: string | Date | undefined;
     paymentStatus?: "PAID" | "UNPAID" | "PARTIALLY_PAID" | undefined;
     paymentDate?: string | Date | undefined;

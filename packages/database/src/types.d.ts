@@ -9,9 +9,11 @@ export interface Client {
 }
 export interface LineItem {
     description: string;
-    quantity: number;
+    quantity?: number;
     price: number;
     taxRate: number;
+    hsnSac?: string;
+    discountPercent?: number;
     taxAmount?: number;
     total?: number;
 }
@@ -27,6 +29,7 @@ export interface BaseDocument {
     notes?: string;
     issueDate: Date | string;
     dueDate?: Date | string;
+    logoUrl?: string;
 }
 export type BillingDocumentType = 'QUOTATION' | 'PROFORMA' | 'FINAL_INVOICE';
 export type QuotationStatus = 'DRAFT' | 'SENT' | 'ACCEPTED' | 'DECLINED' | 'CONVERTED' | 'EXPIRED';

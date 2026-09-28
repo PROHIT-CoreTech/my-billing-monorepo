@@ -1,44 +1,70 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.invoiceSchema = exports.lineItemSchema = exports.clientInfoSchema = exports.clientSchema = void 0;
-const zod_1 = require("zod");
-exports.clientSchema = zod_1.z.object({
-    name: zod_1.z.string().min(1, 'Client name is required'),
-    email: zod_1.z.string().email('Invalid email address'),
-    billingAddress: zod_1.z.string().min(1, 'Billing address is required'),
-    taxId: zod_1.z.string().min(1, 'Tax ID is required'),
-    gstin: zod_1.z.string().optional(),
-    pan: zod_1.z.string().optional(),
+import { z } from 'zod';
+const stringOrRefObject = z.union([z.string(), z.record(z.any()), z.null()]).optional().transform((val) => {
+    if (!val)
+        return undefined;
+    if (typeof val === 'string')
+        return val.trim() || undefined;
+    if (typeof val === 'object')
+        return val.id || val._id || val.toString() || undefined;
+    return undefined;
 });
-exports.clientInfoSchema = exports.clientSchema; // Same shape, used for embedded snapshot validation
-exports.lineItemSchema = zod_1.z.object({
-    description: zod_1.z.string().min(1, 'Description is required'),
-    quantity: zod_1.z.number().positive('Quantity must be greater than 0'),
-    price: zod_1.z.number().nonnegative('Price must be greater than or equal to 0'),
-    taxRate: zod_1.z.number().nonnegative('Tax rate must be greater than or equal to 0').default(0),
-    taxAmount: zod_1.z.number().nonnegative().default(0),
-    total: zod_1.z.number().nonnegative().default(0),
+const requiredStringOrRefObject = z.union([z.string(), z.record(z.any())]).transform((val, ctx) => {
+    if (typeof val === 'string') {
+        const trimmed = val.trim();
+        if (!trimmed) {
+            ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Client ID reference is required' });
+            return z.NEVER;
+        }
+        return trimmed;
+    }
+    if (typeof val === 'object' && val !== null) {
+        const extracted = val.id || val._id || val.toString();
+        if (extracted)
+            return String(extracted);
+    }
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Client ID reference is required' });
+    return z.NEVER;
 });
-exports.invoiceSchema = zod_1.z.object({
-    documentType: zod_1.z.enum(['QUOTATION', 'PROFORMA', 'FINAL_INVOICE']),
-    documentNumber: zod_1.z.string().min(1, 'Document number is required'),
-    clientRef: zod_1.z.string().min(1, 'Client ID reference is required'),
-    clientInfo: exports.clientInfoSchema,
-    items: zod_1.z.array(exports.lineItemSchema).min(1, 'At least one item is required'),
-    subTotal: zod_1.z.number().nonnegative().default(0),
-    taxAmount: zod_1.z.number().nonnegative().default(0),
-    totalAmount: zod_1.z.number().nonnegative().default(0),
-    currency: zod_1.z.string().min(1, 'Currency is required').default('INR'),
-    notes: zod_1.z.string().optional(),
-    issueDate: zod_1.z.union([zod_1.z.date(), zod_1.z.string()]).default(() => new Date()),
-    dueDate: zod_1.z.union([zod_1.z.date(), zod_1.z.string()]).optional(),
-    status: zod_1.z.string().default('DRAFT'),
+export const clientSchema = z.object({
+    name: z.string().min(1, 'Client name is required'),
+    email: z.string().email('Invalid email address'),
+    billingAddress: z.string().min(1, 'Billing address is required'),
+    taxId: z.string().min(1, 'Tax ID is required'),
+    gstin: z.string().optional(),
+    pan: z.string().optional(),
+});
+export const clientInfoSchema = clientSchema; // Same shape, used for embedded snapshot validation
+export const lineItemSchema = z.object({
+    description: z.string().min(1, 'Description is required'),
+    quantity: z.number().nonnegative('Quantity must be greater than or equal to 0').optional(),
+    price: z.number().nonnegative('Price must be greater than or equal to 0'),
+    taxRate: z.number().nonnegative('Tax rate must be greater than or equal to 0').default(0),
+    hsnSac: z.string().optional().default('998311'),
+    discountPercent: z.number().nonnegative('Discount percent must be greater than or equal to 0').optional().default(0),
+    taxAmount: z.number().nonnegative().default(0),
+    total: z.number().nonnegative().default(0),
+});
+export const invoiceSchema = z.object({
+    documentType: z.enum(['QUOTATION', 'PROFORMA', 'FINAL_INVOICE']),
+    documentNumber: z.string().min(1, 'Document number is required'),
+    clientRef: requiredStringOrRefObject,
+    clientInfo: clientInfoSchema,
+    items: z.array(lineItemSchema).min(1, 'At least one item is required'),
+    subTotal: z.number().nonnegative().default(0),
+    taxAmount: z.number().nonnegative().default(0),
+    totalAmount: z.number().nonnegative().default(0),
+    currency: z.string().min(1, 'Currency is required').default('INR'),
+    notes: z.string().optional(),
+    issueDate: z.union([z.date(), z.string()]).default(() => new Date()),
+    dueDate: z.union([z.date(), z.string()]).optional(),
+    status: z.string().default('DRAFT'),
+    logoUrl: z.string().optional(),
     // Tracing references
-    quotationRef: zod_1.z.string().optional(),
-    proformaRef: zod_1.z.string().optional(),
+    quotationRef: stringOrRefObject,
+    proformaRef: stringOrRefObject,
     // Optional parameters based on documentType
-    validUntil: zod_1.z.union([zod_1.z.date(), zod_1.z.string()]).optional(),
-    paymentStatus: zod_1.z.enum(['UNPAID', 'PARTIALLY_PAID', 'PAID']).optional(),
-    paymentDate: zod_1.z.union([zod_1.z.date(), zod_1.z.string()]).optional(),
+    validUntil: z.union([z.date(), z.string()]).optional(),
+    paymentStatus: z.enum(['UNPAID', 'PARTIALLY_PAID', 'PAID']).optional(),
+    paymentDate: z.union([z.date(), z.string()]).optional(),
 });
 //# sourceMappingURL=validation.js.map

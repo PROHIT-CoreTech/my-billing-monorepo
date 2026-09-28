@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "prebuild": "cd ../.. && npm run build --workspace=@my-billing/database && npm run build --workspace=@my-billing/api-client && npm run build --workspace=@my-billing/document-templates",
     "build": "tsc && vite build",
     "preview": "vite preview"
   },
