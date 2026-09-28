@@ -1,18 +1,42 @@
 {
   "version": 2,
+  "buildCommand": "npm run build",
+  "outputDirectory": "apps/web/dist",
   "builds": [
+    {
+      "src": "apps/web/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    },
     {
       "src": "apps/backend/api/index.ts",
       "use": "@vercel/node",
       "config": {
-        "includeFiles": ["apps/backend/src/**", "packages/database/dist/**", "packages/database/package.json"]
+        "includeFiles": [
+          "apps/backend/src/**",
+          "packages/database/dist/**",
+          "packages/database/package.json"
+        ]
       }
     }
   ],
   "routes": [
     {
-      "src": "/(.*)",
+      "src": "/api/(.*)",
       "dest": "apps/backend/api/index.ts"
+    },
+    {
+      "src": "/uploads/(.*)",
+      "dest": "apps/backend/api/index.ts"
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ]
 }

@@ -1,7 +1,14 @@
 import axios from 'axios';
 
+const getInitialBaseUrl = () => {
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    return '/api';
+  }
+  return 'http://localhost:5001/api';
+};
+
 export const apiClient = axios.create({
-  baseURL: 'http://localhost:5001/api', // default base URL
+  baseURL: getInitialBaseUrl(),
   timeout: 120000, // 120 seconds timeout
   headers: {
     'Content-Type': 'application/json',

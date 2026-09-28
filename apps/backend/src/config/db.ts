@@ -1,6 +1,11 @@
 import mongoose from 'mongoose';
 
 export const connectDatabase = async () => {
+  // Reuse existing database connection in serverless warm invocations
+  if (mongoose.connection.readyState >= 1) {
+    return;
+  }
+
   const mongoUri = process.env.MONGODB_URI;
   
   if (!mongoUri) {
@@ -19,8 +24,7 @@ export const connectDatabase = async () => {
       console.error('❌ MONGODB AUTHENTICATION ERROR (bad auth)');
       console.error('-------------------------------------------------------------');
       console.error('The username or password in MONGODB_URI in apps/backend/.env is invalid.');
-      console.error('Please update MONGODB_URI with your correct MongoDB Atlas password or local connection string:');
-      console.error('  MONGODB_URI=mongodb://127.0.0.1:27017/my-billing-local');
+      console.error('Please update MONGODB_URI with your correct MongoDB Atlas password or connection string.');
       console.error('=============================================================\n');
     } else {
       console.error('Error connecting to MongoDB Atlas:', error);

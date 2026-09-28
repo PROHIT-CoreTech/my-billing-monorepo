@@ -5,7 +5,7 @@ import App from './App';
 import { setApiBaseUrl } from '@my-billing/api-client';
 
 // Configure API Client base URL dynamically from environment variables
-const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+const apiUrl = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:5001/api');
 setApiBaseUrl(apiUrl);
 
 const queryClient = new QueryClient({
