@@ -5,7 +5,7 @@
   "main": "./dist/index.js",
   "scripts": {
     "prebuild": "cd ../.. && npm run build --workspace=@my-billing/database",
-    "build": "tsc",
+    "build": "tsc -p tsconfig.build.json",
     "dev": "nodemon src/index.ts",
     "start": "node dist/index.js",
     "migrate": "node dist/migrate.js",
