@@ -14,6 +14,7 @@
     "db:clear": "npm run db:clear --workspace=@my-billing/backend --"
   },
   "devDependencies": {
+    "@vercel/node": "^3.0.0",
     "turbo": "^2.0.0",
     "typescript": "^5.4.5"
   },
